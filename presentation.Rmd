@@ -1,0 +1,78 @@
+---
+title: "The recession and student loans"
+author: "Roger, Adriana, Lilly, David, Joe"
+date: "November 6, 2017"
+output: ioslides_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(shiny)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# Loading in data
+collegedata <- read_excel("MungingProjectsDataofInterest.xlsx")
+
+# Turning the state column into a factor
+collegedata$STABBR <- factor(collegedata$STABBR)
+
+# Renaming columns
+independent_variables <- c("Percentage of fist time college students", 
+                           "Houlsehold Income of Dependent Students", 
+                           "Income of Independent Students", 
+                           "Median Student Debt at Graduation",
+                           "Percentage of Students that are Dependents"
+                           )
+
+colnames(collegedata)[9:13] <- independent_variables
+```
+
+## Recession and loans 
+
+According to the Federal Reserve Bank of New York, student loan debt has grown more than auto loan, credit card, and home equity loan debt combined since 2003. 
+
+The goal of this project is to take a look at descriptive statistics to see how things have changed for students since the 2008 economic crisis.
+
+## Interactive Plot
+
+```{r metrics}
+# Shiny app
+inputPanel(
+  selectizeInput("states",
+                 "State",
+                 levels(collegedata$STABBR),
+                 selected = "FL",
+                 multiple = TRUE), 
+  checkboxGroupInput("variables",
+                     "Variables to Plot:",
+                     choices = independent_variables,
+                     selected = independent_variables[2]))
+
+renderPlot(
+    collegedata[collegedata$STABBR==input$states,] %>%
+      group_by(Year) %>% 
+      select(input$variables) %>%
+      mutate_all(median) %>%
+      gather(variable, value, -Year) %>%
+      ggplot() + geom_line(aes(x=Year, y=value, color=variable))
+)
+```
+
+## Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## R Output
+
+```{r cars}
+summary(cars)
+```
+
+
