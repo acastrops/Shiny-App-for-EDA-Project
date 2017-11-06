@@ -10,10 +10,12 @@
 library(shiny)
 library(readxl)
 library(dplyr)
+library(ggplot2)
+library(tidyr)
 
 # Reading in the data
-data <- read_excel("MungingProjectsDataofInterest.xlsx")
-data$STABBR <- factor(data$STABBR)
+collegedata <- read_excel("MungingProjectsDataofInterest.xlsx")
+collegedata$STABBR <- factor(collegedata$STABBR)
 
 # Columns
 independent_variables <- c("Percentage of fist time college students", 
@@ -23,7 +25,7 @@ independent_variables <- c("Percentage of fist time college students",
                            "Percentage of Students that are Dependents"
                            )
 
-colnames(data)[9:13] <- independent_variables
+colnames(collegedata)[9:13] <- independent_variables
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -34,18 +36,19 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         selectizeInput("state",
+         selectizeInput("states",
                      "State",
-                     levels(data$STABBR),
+                     levels(collegedata$STABBR),
                      selected = "FL"), 
-         checkboxGroupInput("metrics",
-                            "Options",
-                            choices = independent_variables)
+         checkboxGroupInput("variables",
+                            "Variables to Plot:",
+                            choices = independent_variables,
+                            selected = independent_variables[2])
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot")
+         plotOutput("linePlot")
       )
    )
 )
@@ -53,14 +56,14 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = 25)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
-   })
+  output$linePlot <- renderPlot(
+    collegedata[collegedata$STABBR==input$states,] %>%
+      group_by(Year) %>% 
+      select(input$variables) %>%
+      mutate_all(median) %>%
+      gather(variable, value, -Year) %>%
+      ggplot() + geom_line(aes(x=Year, y=value, color=variable))
+  )
 }
 
 # Run the application 
