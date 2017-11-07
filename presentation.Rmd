@@ -97,6 +97,10 @@ mainPanel(
 ```
 
 ## Where does your tuition go?
+The columns PFTFAC, INEXPFTE and TUITFTE track the percentage of full time faculty, instruction expenditure per full-time student equivalent, and tuition revenue per full-time student equivalent. Tracking the last two over time, we see that while average tuition revenue per student increased steadily, the average amount going toward instruction dipped considerably for many years before beginning to climb and eventually--almost--returning to its pre-dip levels.
+
+
+## Where does your tuition go?
 
 ```{r tuition, echo = FALSE, message =FALSE}
 tuition <- collegedata %>% group_by(Year) %>% select(c(TUITFTE, INEXPFTE, AVGFACSAL, PFTFAC)) %>% summarize_all(median)
@@ -109,6 +113,11 @@ ggplot(collegedata) + geom_smooth(aes(x = Year, y = TUITFTE, color = "Average Tu
           scale_y_continuous(labels = scales::dollar) + 
           scale_x_date(date_breaks = "2 year", minor_breaks = NULL, date_labels = "%Y")
 ```
+
+## How much of it goes to faculty?
+
+ We expected this trend to be reflected in the percentage of faculty employed full-time, and we see that it roughly is.
+
 
 ## How much of it goes to faculty?
 
