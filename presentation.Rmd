@@ -15,6 +15,7 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(stringr)
+library(leaflet)
 
 
 # Loading in data
@@ -115,16 +116,34 @@ ggplot(collegedata) + geom_smooth(aes(x = Year, y = TUITFTE, color = "Average Tu
 ggplot(collegedata) + geom_smooth(aes(x=Year, y=PFTFAC)) + theme_bw() + scale_y_continuous(labels = scales::percent) + labs(y="% of Faculty Employed Full-Time")
 ```
 
-## Bullets
+## Choropleth of Full Time Staff
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+```{r map}
+state_data <- collegedata %>%
+    group_by(STABBR) %>%
+    select(PFTFAC, STABBR) %>%
+    summarize(mean(as.numeric(PFTFAC), na.rm=TRUE))
 
-## R Output
+colnames(state_data) <- c('NAME', 'MEAN')
 
-```{r cars}
-summary(cars)
+state_data$NAME <- state.name[match(state_data$NAME,state.abb)]
+
+states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
+
+all_data <- merge(states, state_data, by = "NAME")
+
+m <- leaflet(states) %>%
+  setView(-96, 37.8, 4) %>%
+  addTiles()
+
+pal <- colorQuantile("YlGn", NULL, n = 5)
+
+m %>% addPolygons(fillColor = ~pal(all_data$MEAN), 
+              fillOpacity = 0.8, 
+              color = "#BDBDC3")
 ```
+
+![map](map.png)
+
 
 
