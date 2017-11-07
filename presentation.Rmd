@@ -1,5 +1,5 @@
 ---
-title: "The recession and student loans"
+title: "Recession and education"
 author: "Roger, Adriana, Lilly, David, Joe"
 date: "November 6, 2017"
 output: ioslides_presentation
@@ -45,6 +45,21 @@ The goal of this project is to take a look at descriptive statistics to see how 
 
 ## Cleaning the data
 
+```{r, eval = FALSE}
+i <- 96
+for (dat in myfiles) {
+  cat('\n', i, '\n')
+  i <- i + 1
+  all_cols <- colnames(dat)
+  
+  for (col in all_cols) {
+    perc_na <- sum(dat[,col] %in% c('NULL', 'PrivacySuppressed')) / nrow(dat)
+    if (per_na != 1.0) {
+      cat(col, perc_na, '\n')
+    }
+  }
+}
+```
 
 
 ## Interactive plots
