@@ -1,0 +1,46 @@
+---
+title: "Map"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(leaflet)
+library(dplyr)
+```
+
+```{r}
+data <- read.csv('CollegeScorecard_Raw_Data/MERGED2005_06_PP.csv')
+
+state_data <- data %>%
+    group_by(STABBR) %>%
+    select(PFTFAC, STABBR) %>%
+    summarize(mean(as.numeric(PFTFAC), na.rm=TRUE))
+
+colnames(state_data) <- c('NAME', 'MEAN')
+
+state_data$NAME <- state.name[match(state_data$NAME,state.abb)]
+```
+
+```{r}
+states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
+
+all_data <- merge(states, state_data, by = "NAME")
+
+m <- leaflet(states) %>%
+  setView(-96, 37.8, 4) %>%
+  addTiles()
+
+#state_popup <- paste0(all_data$NAME, '\n', all_data$MEAN)
+
+pal <- colorQuantile("YlGn", NULL, n = 5)
+
+m %>% addPolygons(fillColor = ~pal(all_data$MEAN), 
+              fillOpacity = 0.8, 
+              color = "#BDBDC3")#,
+              #popup = state_popup)
+
+```
+
+
