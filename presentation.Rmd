@@ -19,7 +19,7 @@ library(leaflet)
 
 
 # Loading in data
-collegedata <- read.csv("MungingProjectsDataofInterest.csv")
+collegedata <- read.csv("C:\\DS\\Data Munging\\GroupProject1\\ShinyProject\\MungingProjectsDataofInterest.csv")
 
 # Turning the state column into a factor
 collegedata$STABBR <- factor(collegedata$STABBR)
@@ -127,32 +127,54 @@ ggplot(collegedata) + geom_smooth(aes(x=Year, y=PFTFAC)) + theme_bw() + scale_y_
 
 ## Choropleth of Full Time Staff
 
-```{r map, echo = False, message = False}
-#state_data <- collegedata %>%
-#    group_by(STABBR) %>%
-#    select(PFTFAC, STABBR) %>%
-#    summarize(mean(as.numeric(PFTFAC), na.rm=TRUE))
+```{r map, echo = FALSE, message = FALSE}
+library(manipulate)
+states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
 
-#colnames(state_data) <- c('NAME', 'MEAN')
+map_year <- function(specific_year){
+dates <- unique(collegedata$Year)
+state_data <- collegedata %>%
+    filter(Year == dates[specific_year]) %>% 
+    group_by(STABBR) %>% 
+    select(PFTFAC, STABBR) %>%
+    summarize(mean(as.numeric(PFTFAC), na.rm=TRUE))
 
-#state_data$NAME <- state.name[match(state_data$NAME,state.abb)]
+colnames(state_data) <- c('NAME', 'MEAN')
 
-#states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
+state_data$NAME <- state.name[match(state_data$NAME,state.abb)]
 
-#all_data <- merge(states, state_data, by = "NAME")
 
-#m <- leaflet(states) %>%
-#  setView(-96, 37.8, 4) %>%
-#  addTiles()
 
-#pal <- colorQuantile("YlGn", NULL, n = 5)
+all_data <- merge(states, state_data, by = "NAME")
 
-#m %>% addPolygons(fillColor = ~pal(all_data$MEAN), 
-#              fillOpacity = 0.8, 
-#              color = "#BDBDC3")
+m <- leaflet(states) %>%
+  setView(-96, 37.8, 4) %>%
+  addTiles()
+
+pal <- colorQuantile("YlGn", NULL, n = 5)
+
+m %>% addPolygons(fillColor = ~pal(all_data$MEAN), 
+              fillOpacity = 0.8, 
+              color = "#BDBDC3")
+}
+
+manipulate(map_year(specific_year), specific_year = slider(1, 14, step=1, initial = 1))
 ```
 
 ![map](map.png)
+```{r}
+f3 <- function(n){
+  df <- data.frame(x = numeric(n), y = character(n), z = character(n), stringsAsFactors = FALSE)
+  for(i in 1:n){
+    df$x[i] <- i
+    df$y[i] <- toString(i)
+    df$z[i] <- i**2
+  }
+  df
+}
+test <- f3(9)
+
+```
 
 ## Choropleth Creation
 
