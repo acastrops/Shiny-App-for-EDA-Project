@@ -118,32 +118,35 @@ ggplot(collegedata) + geom_smooth(aes(x=Year, y=PFTFAC)) + theme_bw() + scale_y_
 
 ## Choropleth of Full Time Staff
 
-```{r map}
-state_data <- collegedata %>%
-    group_by(STABBR) %>%
-    select(PFTFAC, STABBR) %>%
-    summarize(mean(as.numeric(PFTFAC), na.rm=TRUE))
+```{r map, echo = False, message = False}
+#state_data <- collegedata %>%
+#    group_by(STABBR) %>%
+#    select(PFTFAC, STABBR) %>%
+#    summarize(mean(as.numeric(PFTFAC), na.rm=TRUE))
 
-colnames(state_data) <- c('NAME', 'MEAN')
+#colnames(state_data) <- c('NAME', 'MEAN')
 
-state_data$NAME <- state.name[match(state_data$NAME,state.abb)]
+#state_data$NAME <- state.name[match(state_data$NAME,state.abb)]
 
-states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
+#states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
 
-all_data <- merge(states, state_data, by = "NAME")
+#all_data <- merge(states, state_data, by = "NAME")
 
-m <- leaflet(states) %>%
-  setView(-96, 37.8, 4) %>%
-  addTiles()
+#m <- leaflet(states) %>%
+#  setView(-96, 37.8, 4) %>%
+#  addTiles()
 
-pal <- colorQuantile("YlGn", NULL, n = 5)
+#pal <- colorQuantile("YlGn", NULL, n = 5)
 
-m %>% addPolygons(fillColor = ~pal(all_data$MEAN), 
-              fillOpacity = 0.8, 
-              color = "#BDBDC3")
+#m %>% addPolygons(fillColor = ~pal(all_data$MEAN), 
+#              fillOpacity = 0.8, 
+#              color = "#BDBDC3")
 ```
 
 ![map](map.png)
 
+## Choropleth Creation
 
-
+* Used dplyr to aggregate average full time percentage by state
+* Used Leaflet and a geometry json to create the shapes on the map to be colored
+* Used `state.name` and `state.abb` to convert state abbreviations to names
