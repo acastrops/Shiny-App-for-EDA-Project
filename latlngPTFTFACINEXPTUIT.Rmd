@@ -1,0 +1,90 @@
+---
+title: "EDA"
+output: pdf_notebook
+---
+
+```{r}
+require("reshape")
+require("dplyr")
+data <- read.delim('C:/DS/Data Munging/GroupProject1/RawData/CollegeScorecard_Raw_Data/MERGED2005_06_PP.csv', header = TRUE, na.strings = c("NULL","PrivacySuppressed", "NA"), sep = ",")
+
+cols <- c('UNITID','UNITID','UNITID6','UNITID','CITY','STABBR','ZIP','ACCREDAGENCY','INSTURL',
+          'NPCURL','SCH_DEG','HCM2','MAIN','NUMBRANCH','PREDDEG','TUITFTE','INEXPFTE',
+          'AVGFACSAL','PFTFAC')
+```
+
+```{r}
+library(data.table)
+project.dir <- "C:/DS/Data Munging/GroupProject1"
+data.dir <- "RawData/CollegeScoreCard_Raw_Data"
+setwd(project.dir)
+
+
+pruned_data = list()
+for(raw_data in files){
+  # The file name is the year
+  year <- substr(raw_data,1,nchar(raw_data)-4)
+  # Get the header--we only want to read in the columns we care about.
+  # header <- read.table(file.path(project.dir,data.dir, "0506.csv"), nrows = 1, header = FALSE, sep =',', stringsAsFactors = FALSE)
+  data <- fread(file.path(project.dir,data.dir,raw_data), select = c("UNITID","PFTFAC","INEXPFTE","TUITFTE"))
+  pruned_data[[year]] <- data
+}
+
+lat_long <- fread(file.path(project.dir,data.dir,"20152016.csv"), select = c("UNITID","LATITUDE","LONGITUDE"))
+
+final_data= list()
+i <- 1
+for(ayear in pruned_data){
+  key_list <- names(pruned_data)
+  lat_long <- lat_long[complete.cases(lat_long)]
+  left <- ayear$UNITID %in% lat_long$UNITID
+  sorted <- ayear[left]
+  right <- lat_long$UNITID %in% sorted$UNITID
+  year_lat_long <- lat_long[right]
+  sorted[order(sorted$UNITID),]=sorted[order(year_lat_long$UNITID),]
+  sorted$lat <- year_lat_long$LATITUDE
+  sorted$long <- year_lat_long$LONGITUDE
+  pruned_data[[key_list[i]]] <- sorted
+  i <- i+1
+}
+
+
+
+#for(ayear in pruned_data){
+ # ayear <- ayear[complete.cases(ayear)]
+  
+#}
+require(ggmap)
+library(ggmap)
+newmap <- get_map(location = "USA", zoom = 1)
+plot(newmap, xlim = c(-100, 100), ylim = c(100, 100), asp = 1)
+points(ayear$lon, ayear$lat, col = "red", cex = .6)
+
+for(ayear in pruned_data){
+  cat(any(is.null(ayear$lat)),any(is.null(ayear$long)))
+}
+str(pruned_data[["20012002"]])
+
+```
+
+
+```{r}
+ayear <- pruned_data[["20012002"]]
+left <- ayear$UNITID %in% lat_long$UNITID
+  sorted <- ayear[left]
+  right <- lat_long$UNITID %in% sorted$UNITID
+  year_lat_long <- lat_long[right]
+  sorted[order(sorted$UNITID),]=sorted[order(year_lat_long$UNITID),]
+  ayear$lat <- year_lat_long$LATITUDE
+  ayear$long <- year_lat_long$LONGITUDE
+  
+  
+test <- c("a","b","c","d")
+test2 <- c("e","b","c")
+test3 <- test[test %in% test2]
+test4 <- test2[test2 %in% test]
+```
+
+
+
+
