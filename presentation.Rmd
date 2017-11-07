@@ -46,7 +46,7 @@ The goal of this project is to take a look at descriptive statistics to see how 
 
 ## Cleaning the data
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, echo=TRUE}
 i <- 96
 for (dat in myfiles) {
   cat('\n', i, '\n')
@@ -127,7 +127,7 @@ ggplot(collegedata) + geom_smooth(aes(x=Year, y=PFTFAC)) + theme_bw() + scale_y_
 
 ## Choropleth of Full Time Staff
 
-```{r map, echo = False, message = False}
+```{r map, echo = FALSE, message = FALSE}
 #state_data <- collegedata %>%
 #    group_by(STABBR) %>%
 #    select(PFTFAC, STABBR) %>%
@@ -152,7 +152,9 @@ ggplot(collegedata) + geom_smooth(aes(x=Year, y=PFTFAC)) + theme_bw() + scale_y_
 #              color = "#BDBDC3")
 ```
 
-![map](map.png)
+```{r, out.width = "750px"}
+knitr::include_graphics("map.png")
+```
 
 ## Choropleth Creation
 
